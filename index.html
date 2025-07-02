@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Netflix</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #141414;
+        color: #fff;
+        font-family: Netflix Sans, Helvetica, sans-serif;
+        overflow-x: hidden;
+      }
+      .header {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        background: linear-gradient(
+          to bottom,
+          rgba(0, 0, 0, 0.7) 10%,
+          rgba(0, 0, 0, 0)
+        );
+        z-index: 999;
+        padding: 0 4%;
+        height: 68px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: background 0.4s;
+      }
+      .header.scrolled {
+        background: #141414;
+      }
+      .logo {
+        color: #e50914;
+        font-size: 25px;
+        font-weight: 900;
+        margin-right: 25px;
+        text-decoration: none;
+      }
+      .nav {
+        display: flex;
+        list-style: none;
+        gap: 20px;
+      }
+      .nav a {
+        color: #e5e5e5;
+        text-decoration: none;
+        font-size: 14px;
+        transition: color 0.4s;
+      }
+      .nav a:hover {
+        color: #b3b3b3;
+      }
+      .billboard {
+        position: relative;
+        height: 100vh;
+        background: linear-gradient(
+            77deg,
+            rgba(0, 0, 0, 0.6) 0,
+            transparent 85%
+          ),
+          linear-gradient(0deg, #111 0, transparent 50%, transparent 100%),
+          url("https://d3e79alseq88cx.cloudfront.net/cms/63d2641d97dbac0b6e2bed9b/compressed");
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        padding: 0 4%;
+      }
+      .billboard-info {
+        width: 40%;
+        z-index: 10;
+        max-width: 500px;
+      }
+      .billboard-title {
+        font-size: 4rem;
+        font-weight: 700;
+        line-height: 1.1;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+      }
+      .billboard-description {
+        font-size: 1.2rem;
+        line-height: 1.4;
+        margin-bottom: 2rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        max-width: 400px;
+      }
+      .btn {
+        padding: 0.8rem 2rem;
+        border: none;
+        border-radius: 4px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+        text-decoration: none;
+        margin-right: 12px;
+      }
+      .btn-play {
+        background: #fff;
+        color: #000;
+      }
+      .btn-play:hover {
+        background: rgba(255, 255, 255, 0.75);
+      }
+      .btn-info {
+        background: rgba(109, 109, 110, 0.7);
+        color: #fff;
+      }
+      .btn-info:hover {
+        background: rgba(109, 109, 110, 0.4);
+      }
+      .content-rows {
+        margin-top: -150px;
+        position: relative;
+        z-index: 10;
+        padding-bottom: 100px;
+      }
+      .row {
+        margin-bottom: 3vw;
+      }
+      .row-header {
+        color: #e5e5e5;
+        font-size: 1.4vw;
+        font-weight: 700;
+        margin: 0 4% 0.5em 4%;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .row-container {
+        position: relative;
+        padding: 0 4%;
+      }
+      .slider {
+        position: relative;
+        overflow: hidden;
+      }
+      .slider-content {
+        display: flex;
+        transition: transform 0.5s ease;
+        gap: 4px;
+      }
+      .slider-item {
+        flex: 0 0 auto;
+        width: calc(100% / 6 - 3.33px);
+        position: relative;
+        cursor: pointer;
+      }
+      .slider-item-image {
+        width: 100%;
+        aspect-ratio: 16/9;
+        border-radius: 4px;
+        background-size: cover;
+        background-position: center;
+        background-color: #333;
+        transition: all 0.3s ease;
+        border: 1px solid #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: #666;
+      }
+      .slider-item:hover .slider-item-image {
+        transform: scale(1.05);
+        border-color: #fff;
+      }
+      .slider-item-title {
+        position: absolute;
+        bottom: -30px;
+        left: 0;
+        right: 0;
+        color: #e5e5e5;
+        font-size: 0.9rem;
+        font-weight: 600;
+        opacity: 0;
+        transition: opacity 0.3s;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 8px;
+        border-radius: 4px;
+      }
+      .slider-item:hover .slider-item-title {
+        opacity: 1;
+      }
+      .nav-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0, 0, 0, 0.7);
+        border: none;
+        color: #fff;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        font-size: 24px;
+        cursor: pointer;
+        z-index: 10;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .nav-btn:hover {
+        background: rgba(0, 0, 0, 0.9);
+        transform: translateY(-50%) scale(1.1);
+      }
+      .nav-btn.prev {
+        left: -30px;
+      }
+      .nav-btn.next {
+        right: -30px;
+      }
+      @media (max-width: 1400px) {
+        .slider-item {
+          width: calc(100% / 5 - 3.2px);
+        }
+      }
+      @media (max-width: 1100px) {
+        .slider-item {
+          width: calc(100% / 4 - 3px);
+        }
+      }
+      @media (max-width: 1000px) {
+        .slider-item {
+          width: calc(100% / 3 - 2.67px);
+        }
+        .billboard-title {
+          font-size: 8vw;
+        }
+        .billboard-description {
+          font-size: 4vw;
+        }
+        .row-header {
+          font-size: 4vw;
+        }
+      }
+      @media (max-width: 500px) {
+        .slider-item {
+          width: calc(50% - 2px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header" id="header">
+      <div style="display: flex; align-items: center">
+        <a href="#" class="logo">ni steams</a>
+        <ul class="nav">
+          <li><a href="#">Home</a></li>
+          <li><a href="#">TV Shows</a></li>
+          <li><a href="#">Movies</a></li>
+          <li><a href="#">New & Popular</a></li>
+          <li><a href="#">My List</a></li>
+        </ul>
+      </div>
+      <div style="display: flex; align-items: center; gap: 20px"></div>
+    </header>
+
+    <div class="billboard">
+      <div class="billboard-info">
+        <h1 class="billboard-title">new movie up coming</h1>
+        <p class="billboard-description">no idea yet lol.</p>
+        <div>
+          <a href="#" class="btn btn-play">▶ Play</a>
+          <a href="#" class="btn btn-info">ℹ More Info</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-rows">
+      <div class="row">
+        <h2 class="row-header">Trending Now</h2>
+        <div class="row-container">
+          <div class="slider">
+            <div class="slider-content" id="trending-slider">
+              <div class="slider-item" data-movie="movie1">
+                <div
+                  class="slider-item-image"
+                  style="
+                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
+                  "
+                >
+                  🎬
+                </div>
+                <div class="slider-item-title">The Dark Knight</div>
+              </div>
+              <div class="slider-item" data-movie="movie2">
+                <div
+                  class="slider-item-image"
+                  style="
+                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
+                  "
+                >
+                  🎭
+                </div>
+                <div class="slider-item-title">Inception</div>
+              </div>
+              <div class="slider-item" data-movie="movie3">
+                <div
+                  class="slider-item-image"
+                  style="
+                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
+                  "
+                >
+                  🚀
+                </div>
+                <div class="slider-item-title">Interstellar</div>
+              </div>
+              <div class="slider-item" data-movie="movie4">
+                <div
+                  class="slider-item-image"
+                  style="
+                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
+                  "
+                >
+                  ⚡
+                </div>
+                <div class="slider-item-title">The Matrix</div>
+              </div>
+              <div class="slider-item" data-movie="movie5">
+                <div
+                  class="slider-item-image"
+                  style="
+                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
+                  "
+                >
+                  🦸
+                </div>
+                <div class="slider-item-title">Avengers</div>
+              </div>
+              <div class="slider-item" data-movie="movie6">
+                <div
+                  class="slider-item-image"
+                  style="
+                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
+                  "
+                >
+                  🏃
+                </div>
+                <div class="slider-item-title">Mad Max</div>
+              </div>
+              <div class="slider-item" data-movie="movie7">
+                <div
+                  class="slider-item-image"
+                  style="
+                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
+                  "
+                >
+                  🎯
+                </div>
+                <div class="slider-item-title">John Wick</div>
+              </div>
+              <div class="slider-item" data-movie="movie8">
+                <div
+                  class="slider-item-image"
+                  style="
+                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
+                  "
+                >
+                  🕷️
+                </div>
+                <div class="slider-item-title">Spider-Man</div>
+              </div>
+            </div>
+            <button class="nav-btn prev" onclick="slide('trending-slider',-1)">
+              ‹
+            </button>
+            <button class="nav-btn next" onclick="slide('trending-slider',1)">
+              ›
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <h2 class="row-header">Popular on ni streams</h2>
+        <div class="row-container">
+          <div class="slider">
+            <div class="slider-content" id="popular-slider">
+              <div class="slider-item" data-movie="movie9">
+                <div
+                  class="slider-item-image"
+                  style="
+                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
+                  "
+                >
+                  👑
+                </div>
+                <div class="slider-item-title">The Crown</div>
+              </div>
+              <div class="slider-item" data-movie="movie10">
+                <div
+                  class="slider-item-image"
+                  style="
+                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
+                  "
+                >
+                  💰
+                </div>
+                <div class="slider-item-title">Money Heist</div>
+              </div>
+              <div class="slider-item" data-movie="movie11">
+                <div
+                  class="slider-item-image"
+                  style="
+                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
+                  "
+                >
+                  🎪
+                </div>
+                <div class="slider-item-title">Bridgerton</div>
+              </div>
+              <div class="slider-item" data-movie="movie12">
+                <div
+                  class="slider-item-image"
+                  style="
+                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
+                  "
+                >
+                  🔥
+                </div>
+                <div class="slider-item-title">Lucifer</div>
+              </div>
+              <div class="slider-item" data-movie="movie13">
+                <div
+                  class="slider-item-image"
+                  style="
+                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
+                  "
+                >
+                  🌊
+                </div>
+                <div class="slider-item-title">The Witcher</div>
+              </div>
+              <div class="slider-item" data-movie="movie14">
+                <div
+                  class="slider-item-image"
+                  style="
+                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
+                  "
+                >
+                  🏠
+                </div>
+                <div class="slider-item-title">Ozark</div>
+              </div>
+            </div>
+            <button class="nav-btn prev" onclick="slide('popular-slider',-1)">
+              ‹
+            </button>
+            <button class="nav-btn next" onclick="slide('popular-slider',1)">
+              ›
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <h2 class="row-header">Only on ni streams</h2>
+        <div class="row-container">
+          <div class="slider">
+            <div class="slider-content" id="originals-slider">
+              <div class="slider-item" data-movie="movie15">
+                <div
+                  class="slider-item-image"
+                  style="
+                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
+                  "
+                >
+                  🌟
+                </div>
+                <div class="slider-item-title">Orange is the New Black</div>
+              </div>
+              <div class="slider-item" data-movie="movie16">
+                <div
+                  class="slider-item-image"
+                  style="
+                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
+                  "
+                >
+                  📺
+                </div>
+                <div class="slider-item-title">House of Cards</div>
+              </div>
+              <div class="slider-item" data-movie="movie17">
+                <div
+                  class="slider-item-image"
+                  style="
+                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
+                  "
+                >
+                  🎵
+                </div>
+                <div class="slider-item-title">Umbrella Academy</div>
+              </div>
+              <div class="slider-item" data-movie="movie18">
+                <div
+                  class="slider-item-image"
+                  style="
+                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
+                  "
+                >
+                  🎲
+                </div>
+                <div class="slider-item-title">Squid Game</div>
+              </div>
+              <div class="slider-item" data-movie="movie19">
+                <div
+                  class="slider-item-image"
+                  style="
+                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
+                  "
+                >
+                  🦋
+                </div>
+                <div class="slider-item-title">Wednesday</div>
+              </div>
+              <div class="slider-item" data-movie="movie20">
+                <div
+                  class="slider-item-image"
+                  style="
+                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
+                  "
+                >
+                  🎨
+                </div>
+                <div class="slider-item-title">Emily in Paris</div>
+              </div>
+            </div>
+            <button class="nav-btn prev" onclick="slide('originals-slider',-1)">
+              ‹
+            </button>
+            <button class="nav-btn next" onclick="slide('originals-slider',1)">
+              ›
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      window.addEventListener("scroll", () => {
+        document
+          .getElementById("header")
+          .classList.toggle("scrolled", window.scrollY > 0);
+      });
+
+      const sliderStates = {};
+      function slide(id, dir) {
+        const slider = document.getElementById(id);
+        const items = slider.children;
+        const itemWidth = items[0].offsetWidth + 4;
+        const visibleItems = Math.floor(slider.offsetWidth / itemWidth);
+
+        if (!sliderStates[id]) sliderStates[id] = { currentIndex: 0 };
+
+        const state = sliderStates[id];
+        const maxIndex = Math.max(0, items.length - visibleItems);
+
+        state.currentIndex += dir * visibleItems;
+        if (state.currentIndex < 0) state.currentIndex = 0;
+        else if (state.currentIndex > maxIndex) state.currentIndex = maxIndex;
+
+        slider.style.transform = `translateX(${-(
+          state.currentIndex * itemWidth
+        )}px)`;
+      }
+
+      function openMovie(movieId) {
+        const url = `${movieId}.html`;
+        const newTab = window.open(url, "_blank");
+        if (!newTab || newTab.closed || typeof newTab.closed == "undefined") {
+          window.location.href = url;
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll(".slider-item").forEach((item) => {
+          item.addEventListener("click", () => {
+            const movieId = item.dataset.movie;
+            if (movieId) openMovie(movieId);
+          });
+        });
+
+        const playBtn = document.querySelector(".btn-play");
+        if (playBtn) {
+          playBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            openMovie("stranger-things");
+          });
+        }
+      });
+
+      window.addEventListener("resize", () => {
+        Object.keys(sliderStates).forEach((id) => {
+          sliderStates[id].currentIndex = 0;
+          document.getElementById(id).style.transform = "translateX(0px)";
+        });
+      });
+    </script>
+  </body>
+</html>
