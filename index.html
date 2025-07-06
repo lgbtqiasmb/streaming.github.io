@@ -2,609 +2,572 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ni streams</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Peflolo - 3D Photo Gallery</title>
     <style>
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
       }
+
       body {
-        background: #141414;
-        color: #fff;
-        font-family: Netflix Sans, Helvetica, sans-serif;
+        font-family: "Inter", sans-serif;
         overflow-x: hidden;
+        color: #b36a6a;
+        position: relative;
       }
-      .header {
+
+      /* 3D Background */
+      .background-3d {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 120%;
+        z-index: -1;
+      }
+
+      .background-3d iframe {
+        width: 110%;
+        height: 90%;
+        border: none;
+        pointer-events: none;
+      }
+
+      /* Dark overlay to make content visible */
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.196);
+        z-index: 0;
+      }
+
+      /* Navigation */
+      #nav-placeholder {
         position: fixed;
         top: 0;
         width: 100%;
-        background: linear-gradient(
-          to bottom,
-          rgba(0, 0, 0, 0.7) 10%,
-          rgba(0, 0, 0, 0)
-        );
-        z-index: 999;
-        padding: 0 4%;
-        height: 68px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        transition: background 0.4s;
+        z-index: 1000;
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
       }
-      .header.scrolled {
-        background: #141414;
-      }
-      .logo {
-        color: #e50914;
-        font-size: 25px;
-        font-weight: 900;
-        margin-right: 25px;
-        text-decoration: none;
-      }
-      .nav {
-        display: flex;
-        list-style: none;
-        gap: 20px;
-      }
-      .nav a {
-        color: #e5e5e5;
-        text-decoration: none;
-        font-size: 14px;
-        transition: color 0.4s;
-      }
-      .nav a:hover {
-        color: #b3b3b3;
-      }
-      .billboard {
+
+      /* Main Content */
+      .main-content {
         position: relative;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         height: 100vh;
-        background: linear-gradient(
-            77deg,
-            rgba(0, 0, 0, 0.6) 0,
-            transparent 85%
-          ),
-          linear-gradient(0deg, #111 0, transparent 50%, transparent 100%),
-          url("https://d3e79alseq88cx.cloudfront.net/cms/63d2641d97dbac0b6e2bed9b/compressed");
-        background-size: cover;
-        background-position: center;
+        padding: 2rem;
+      }
+
+      /* Hero Title */
+      .hero-title {
+        font-size: 3rem;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 3rem;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        background: linear-gradient(45deg, #fff, #f0f0f0);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      /* Scroll indicator */
+      .scroll-indicator {
+        position: absolute;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
         display: flex;
+        flex-direction: column;
         align-items: center;
-        padding: 0 4%;
+        gap: 1rem;
+        animation: bounce 2s infinite;
       }
-      .billboard-info {
-        width: 40%;
-        z-index: 10;
-        max-width: 500px;
+
+      .scroll-text {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1rem;
+        font-weight: 300;
       }
-      .billboard-title {
-        font-size: 4rem;
-        font-weight: 700;
-        line-height: 1.1;
-        margin-bottom: 1rem;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+
+      .scroll-arrow {
+        width: 2px;
+        height: 30px;
+        background: rgba(255, 255, 255, 0.6);
+        position: relative;
       }
-      .billboard-description {
-        font-size: 1.2rem;
-        line-height: 1.4;
-        margin-bottom: 2rem;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-        max-width: 400px;
+
+      .scroll-arrow::after {
+        content: "";
+        position: absolute;
+        bottom: -5px;
+        left: -3px;
+        width: 8px;
+        height: 8px;
+        border-right: 2px solid rgba(255, 255, 255, 0.6);
+        border-bottom: 2px solid rgba(255, 255, 255, 0.6);
+        transform: rotate(45deg);
       }
-      .btn {
-        padding: 0.8rem 2rem;
-        border: none;
-        border-radius: 4px;
-        font-size: 1.1rem;
-        font-weight: 600;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        transition: all 0.2s;
-        text-decoration: none;
-        margin-right: 12px;
+
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateX(-50%) translateY(0);
+        }
+        50% {
+          transform: translateX(-50%) translateY(-10px);
+        }
       }
-      .btn-play {
-        background: #fff;
-        color: #000;
-      }
-      .btn-play:hover {
-        background: rgba(255, 255, 255, 0.75);
-      }
-      .btn-info {
-        background: rgba(109, 109, 110, 0.7);
-        color: #fff;
-      }
-      .btn-info:hover {
-        background: rgba(109, 109, 110, 0.4);
-      }
-      .content-rows {
-        margin-top: -150px;
+
+      /* Featured Photo Section */
+      .featured-section {
         position: relative;
         z-index: 10;
-        padding-bottom: 100px;
-      }
-      .row {
-        margin-bottom: 3vw;
-      }
-      .row-header {
-        color: #e5e5e5;
-        font-size: 1.4vw;
-        font-weight: 700;
-        margin: 0 4% 0.5em 4%;
-        text-decoration: none;
-        display: inline-block;
-      }
-      .row-container {
-        position: relative;
-        padding: 0 4%;
-      }
-      .slider {
-        position: relative;
+        height: 100vh;
         overflow: hidden;
       }
-      .slider-content {
-        display: flex;
-        transition: transform 0.5s ease;
-        gap: 4px;
-      }
-      .slider-item {
-        flex: 0 0 auto;
-        width: calc(100% / 6 - 3.33px);
-        position: relative;
-        cursor: pointer;
-      }
-      .slider-item-image {
+
+      .featured-photo {
         width: 100%;
-        aspect-ratio: 16/9;
-        border-radius: 4px;
-        background-size: cover;
-        background-position: center;
-        background-color: #333;
-        transition: all 0.3s ease;
-        border: 1px solid #333;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2rem;
-        color: #666;
+        height: 100%;
+        object-fit: contain;
+        object-position: center;
+        cursor: pointer;
+        transition: transform 0.5s ease;
       }
-      .slider-item:hover .slider-item-image {
+
+      .featured-photo:hover {
         transform: scale(1.05);
-        border-color: #fff;
       }
-      .slider-item-title {
+
+      .featured-overlay {
         position: absolute;
-        bottom: -30px;
+        bottom: 0;
         left: 0;
         right: 0;
-        color: #e5e5e5;
-        font-size: 0.9rem;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+        color: white;
+        padding: 2rem;
+        transform: translateY(100%);
+        transition: transform 0.5s ease;
+      }
+
+      .featured-section:hover .featured-overlay {
+        transform: translateY(0);
+      }
+
+      .featured-overlay h3 {
+        font-size: 1.5rem;
         font-weight: 600;
-        opacity: 0;
-        transition: opacity 0.3s;
-        text-align: center;
-        background: rgba(0, 0, 0, 0.8);
-        padding: 8px;
-        border-radius: 4px;
+        margin-bottom: 0.5rem;
       }
-      .slider-item:hover .slider-item-title {
-        opacity: 1;
-      }
-      .nav-btn {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        background: rgba(0, 0, 0, 0.7);
-        border: none;
-        color: #fff;
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        font-size: 24px;
-        cursor: pointer;
+
+      /* Gallery Section */
+      .gallery-section {
+        position: relative;
         z-index: 10;
-        transition: all 0.3s;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 2rem;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(10px);
+      }
+
+      .gallery-section-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 3rem;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        background: linear-gradient(45deg, #fff, #f0f0f0);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s ease;
+      }
+
+      .gallery-section-title.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* 3D Gallery Container */
+      .gallery-container {
+        position: relative;
+        width: 250px;
+        height: 550px;
+        transform-style: preserve-3d;
+        transform: perspective(1000px) rotateY(0deg);
+        transition: transform 1s ease;
+        margin-bottom: 3rem;
+        opacity: 0;
+        transform: perspective(1000px) rotateY(0deg) translateY(50px);
+        transition: all 1s ease;
+      }
+
+      .gallery-container.visible {
+        opacity: 1;
+        transform: perspective(1000px) rotateY(0deg) translateY(0);
+      }
+
+      .gallery-container span {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        transform: rotateY(calc(var(--i) * 45deg)) translateZ(300px);
+        -webkit-box-reflect: below 0px
+          linear-gradient(transparent, transparent, rgba(0, 0, 0, 0.2));
+      }
+
+      .gallery-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        user-select: none;
+        -webkit-user-drag: none;
+        draggable: false;
+        cursor: pointer;
+      }
+
+      /* Controls */
+      .controls {
+        display: flex;
+        gap: 2rem;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 1s ease 0.3s;
+      }
+
+      .controls.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .btn {
+        width: 50px;
+        height: 50px;
+        border: 2px solid rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
         display: flex;
         align-items: center;
         justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
       }
-      .nav-btn:hover {
-        background: rgba(0, 0, 0, 0.9);
-        transform: translateY(-50%) scale(1.1);
+
+      .btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.1);
       }
-      .nav-btn.prev {
-        left: -30px;
+
+      .btn:active {
+        background: rgba(255, 255, 255, 0.3);
       }
-      .nav-btn.next {
-        right: -30px;
+
+      .btn::before {
+        content: "";
+        width: 10px;
+        height: 10px;
+        border-top: 2px solid #fff;
+        border-right: 2px solid #fff;
+        transform: rotate(45deg);
       }
-      @media (max-width: 1400px) {
-        .slider-item {
-          width: calc(100% / 5 - 3.2px);
+
+      .btn.prev::before {
+        transform: rotate(225deg);
+      }
+
+      /* Mobile */
+      @media (max-width: 768px) {
+        .hero-title {
+          font-size: 2rem;
+        }
+
+        .featured-title,
+        .gallery-section-title {
+          font-size: 2rem;
+        }
+
+        .featured-overlay {
+          padding: 1rem;
+        }
+
+        .gallery-container {
+          width: 150px;
+          height: 150px;
+        }
+
+        .gallery-container span {
+          transform: rotateY(calc(var(--i) * 45deg)) translateZ(200px);
+          backface-visibility: hidden;
         }
       }
-      @media (max-width: 1100px) {
-        .slider-item {
-          width: calc(100% / 4 - 3px);
-        }
+
+      /* Lightbox styles */
+      #lightbox {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.85);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 2000;
+        cursor: pointer;
       }
-      @media (max-width: 1000px) {
-        .slider-item {
-          width: calc(100% / 3 - 2.67px);
-        }
-        .billboard-title {
-          font-size: 8vw;
-        }
-        .billboard-description {
-          font-size: 4vw;
-        }
-        .row-header {
-          font-size: 4vw;
-        }
+
+      #lightbox.visible {
+        visibility: visible;
+        opacity: 1;
       }
-      @media (max-width: 500px) {
-        .slider-item {
-          width: calc(50% - 2px);
-        }
+
+      #lightbox img {
+        max-width: 90vw;
+        max-height: 90vh;
+        border-radius: 10px;
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.7);
+        user-select: none;
+        pointer-events: none;
+      }
+
+      #lightbox .close-btn {
+        position: fixed;
+        top: 20px;
+        right: 30px;
+        font-size: 2rem;
+        color: #fff;
+        cursor: pointer;
+        user-select: none;
+        z-index: 2100;
       }
     </style>
   </head>
   <body>
-    <header class="header" id="header">
-      <div style="display: flex; align-items: center">
-        <a href="#" class="logo">ni steams</a>
-        <ul class="nav">
-          <li><a href="#">Home</a></li>
-          <li><a href="#">TV Shows</a></li>
-          <li><a href="#">Movies</a></li>
-          <li><a href="#">New & Popular</a></li>
-          <li><a href="#">My List</a></li>
-        </ul>
-      </div>
-      <div style="display: flex; align-items: center; gap: 20px"></div>
-    </header>
+    <!-- 3D Background -->
+    <div class="background-3d">
+      <iframe
+        src="https://sketchfab.com/models/49de2a4b5e8c4ef1a6bf222a1c62e02d/embed?autostart=1&ui_controls=0&ui_infos=0&ui_inspector=0&ui_stop=0&ui_watermark=0&ui_help=0&ui_settings=0&ui_vr=0&ui_fullscreen=0&ui_annotations=0"
+      ></iframe>
+    </div>
 
-    <div class="billboard">
-      <div class="billboard-info">
-        <h1 class="billboard-title">new movie up coming</h1>
-        <p class="billboard-description">no idea yet lol.</p>
-        <div>
-          <a href="#" class="btn btn-play">▶ Play</a>
-          <a href="#" class="btn btn-info">ℹ More Info</a>
-        </div>
+    <!-- Dark Overlay -->
+    <div class="overlay"></div>
+
+    <!-- Navigation -->
+    <div id="nav-placeholder"></div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Scroll Indicator -->
+      <div class="scroll-indicator">
+        <span class="scroll-text">Scroll to explore gallery</span>
+        <div class="scroll-arrow"></div>
       </div>
     </div>
 
-    <div class="content-rows">
-      <div class="row">
-        <h2 class="row-header">Trending Now</h2>
-        <div class="row-container">
-          <div class="slider">
-            <div class="slider-content" id="trending-slider">
-              <div class="slider-item" data-movie="movie1">
-                <div
-                  class="slider-item-image"
-                  style="
-                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
-                  "
-                >
-                  🎬
-                </div>
-                <div class="slider-item-title">The Dark Knight</div>
-              </div>
-              <div class="slider-item" data-movie="movie2">
-                <div
-                  class="slider-item-image"
-                  style="
-                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
-                  "
-                >
-                  🎭
-                </div>
-                <div class="slider-item-title">Inception</div>
-              </div>
-              <div class="slider-item" data-movie="movie3">
-                <div
-                  class="slider-item-image"
-                  style="
-                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
-                  "
-                >
-                  🚀
-                </div>
-                <div class="slider-item-title">Interstellar</div>
-              </div>
-              <div class="slider-item" data-movie="movie4">
-                <div
-                  class="slider-item-image"
-                  style="
-                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
-                  "
-                >
-                  ⚡
-                </div>
-                <div class="slider-item-title">The Matrix</div>
-              </div>
-              <div class="slider-item" data-movie="movie5">
-                <div
-                  class="slider-item-image"
-                  style="
-                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
-                  "
-                >
-                  🦸
-                </div>
-                <div class="slider-item-title">Avengers</div>
-              </div>
-              <div class="slider-item" data-movie="movie6">
-                <div
-                  class="slider-item-image"
-                  style="
-                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
-                  "
-                >
-                  🏃
-                </div>
-                <div class="slider-item-title">Mad Max</div>
-              </div>
-              <div class="slider-item" data-movie="movie7">
-                <div
-                  class="slider-item-image"
-                  style="
-                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
-                  "
-                >
-                  🎯
-                </div>
-                <div class="slider-item-title">John Wick</div>
-              </div>
-              <div class="slider-item" data-movie="movie8">
-                <div
-                  class="slider-item-image"
-                  style="
-                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
-                  "
-                >
-                  🕷️
-                </div>
-                <div class="slider-item-title">Spider-Man</div>
-              </div>
-            </div>
-            <button class="nav-btn prev" onclick="slide('trending-slider',-1)">
-              ‹
-            </button>
-            <button class="nav-btn next" onclick="slide('trending-slider',1)">
-              ›
-            </button>
-          </div>
-        </div>
+    <!-- Featured Photo Section -->
+    <div class="featured-section">
+      <img src="img/img1.jpg" alt="Featured Photo" class="featured-photo" />
+      <div class="featured-overlay"></div>
+    </div>
+
+    <!-- Gallery Section -->
+    <div class="gallery-section">
+      <!-- 3D Gallery -->
+      <div class="gallery-container" id="gallery">
+        <span style="--i: 1">
+          <img src="img/img1.jpg" alt="Photo 1" draggable="false" />
+        </span>
+        <span style="--i: 2">
+          <img src="img/img2.jpg" alt="Photo 2" draggable="false" />
+        </span>
+        <span style="--i: 3">
+          <img src="img/img3.jpg" alt="Photo 3" draggable="false" />
+        </span>
+        <span style="--i: 4">
+          <img src="img/img4.jpg" alt="Photo 4" draggable="false" />
+        </span>
+        <span style="--i: 5">
+          <img src="img/img5.jpg" alt="Photo 5" draggable="false" />
+        </span>
+        <span style="--i: 6">
+          <img src="img/img6.jpg" alt="Photo 6" draggable="false" />
+        </span>
+        <span style="--i: 7">
+          <img src="img/img1.jpg" alt="Photo 7" draggable="false" />
+        </span>
+        <span style="--i: 8">
+          <img src="img/img2.jpg" alt="Photo 8" draggable="false" />
+        </span>
       </div>
 
-      <div class="row">
-        <h2 class="row-header">Popular on ni streams</h2>
-        <div class="row-container">
-          <div class="slider">
-            <div class="slider-content" id="popular-slider">
-              <div class="slider-item" data-movie="movie9">
-                <div
-                  class="slider-item-image"
-                  style="
-                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
-                  "
-                >
-                  👑
-                </div>
-                <div class="slider-item-title">The Crown</div>
-              </div>
-              <div class="slider-item" data-movie="movie10">
-                <div
-                  class="slider-item-image"
-                  style="
-                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
-                  "
-                >
-                  💰
-                </div>
-                <div class="slider-item-title">Money Heist</div>
-              </div>
-              <div class="slider-item" data-movie="movie11">
-                <div
-                  class="slider-item-image"
-                  style="
-                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
-                  "
-                >
-                  🎪
-                </div>
-                <div class="slider-item-title">Bridgerton</div>
-              </div>
-              <div class="slider-item" data-movie="movie12">
-                <div
-                  class="slider-item-image"
-                  style="
-                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
-                  "
-                >
-                  🔥
-                </div>
-                <div class="slider-item-title">Lucifer</div>
-              </div>
-              <div class="slider-item" data-movie="movie13">
-                <div
-                  class="slider-item-image"
-                  style="
-                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
-                  "
-                >
-                  🌊
-                </div>
-                <div class="slider-item-title">The Witcher</div>
-              </div>
-              <div class="slider-item" data-movie="movie14">
-                <div
-                  class="slider-item-image"
-                  style="
-                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
-                  "
-                >
-                  🏠
-                </div>
-                <div class="slider-item-title">Ozark</div>
-              </div>
-            </div>
-            <button class="nav-btn prev" onclick="slide('popular-slider',-1)">
-              ‹
-            </button>
-            <button class="nav-btn next" onclick="slide('popular-slider',1)">
-              ›
-            </button>
-          </div>
-        </div>
+      <!-- Controls -->
+      <div class="controls">
+        <div class="btn prev"></div>
+        <div class="btn next"></div>
       </div>
+    </div>
 
-      <div class="row">
-        <h2 class="row-header">Only on ni streams</h2>
-        <div class="row-container">
-          <div class="slider">
-            <div class="slider-content" id="originals-slider">
-              <div class="slider-item" data-movie="movie15">
-                <div
-                  class="slider-item-image"
-                  style="
-                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
-                  "
-                >
-                  🌟
-                </div>
-                <div class="slider-item-title">Orange is the New Black</div>
-              </div>
-              <div class="slider-item" data-movie="movie16">
-                <div
-                  class="slider-item-image"
-                  style="
-                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
-                  "
-                >
-                  📺
-                </div>
-                <div class="slider-item-title">House of Cards</div>
-              </div>
-              <div class="slider-item" data-movie="movie17">
-                <div
-                  class="slider-item-image"
-                  style="
-                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
-                  "
-                >
-                  🎵
-                </div>
-                <div class="slider-item-title">Umbrella Academy</div>
-              </div>
-              <div class="slider-item" data-movie="movie18">
-                <div
-                  class="slider-item-image"
-                  style="
-                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
-                  "
-                >
-                  🎲
-                </div>
-                <div class="slider-item-title">Squid Game</div>
-              </div>
-              <div class="slider-item" data-movie="movie19">
-                <div
-                  class="slider-item-image"
-                  style="
-                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
-                  "
-                >
-                  🦋
-                </div>
-                <div class="slider-item-title">Wednesday</div>
-              </div>
-              <div class="slider-item" data-movie="movie20">
-                <div
-                  class="slider-item-image"
-                  style="
-                    background-image: url('https://images.unsplash.com/photo-1489599611397-b265d04e3e24?w=400&q=80');
-                  "
-                >
-                  🎨
-                </div>
-                <div class="slider-item-title">Emily in Paris</div>
-              </div>
-            </div>
-            <button class="nav-btn prev" onclick="slide('originals-slider',-1)">
-              ‹
-            </button>
-            <button class="nav-btn next" onclick="slide('originals-slider',1)">
-              ›
-            </button>
-          </div>
-        </div>
-      </div>
+    <!-- Lightbox -->
+    <div id="lightbox">
+      <span class="close-btn" title="Close">&times;</span>
+      <img src="" alt="Expanded photo" />
     </div>
 
     <script>
-      window.addEventListener("scroll", () => {
-        document
-          .getElementById("header")
-          .classList.toggle("scrolled", window.scrollY > 0);
+      // Load navigation
+      window.addEventListener("DOMContentLoaded", () => {
+        fetch("menu.html")
+          .then((res) => res.text())
+          .then((html) => {
+            document.getElementById("nav-placeholder").innerHTML = html;
+          })
+          .catch((err) => console.error("Error loading menu:", err));
       });
 
-      const sliderStates = {};
-      function slide(id, dir) {
-        const slider = document.getElementById(id);
-        const items = slider.children;
-        const itemWidth = items[0].offsetWidth + 4;
-        const visibleItems = Math.floor(slider.offsetWidth / itemWidth);
+      // Scroll animations
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: "0px 0px -50px 0px",
+      };
 
-        if (!sliderStates[id]) sliderStates[id] = { currentIndex: 0 };
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      }, observerOptions);
 
-        const state = sliderStates[id];
-        const maxIndex = Math.max(0, items.length - visibleItems);
-
-        state.currentIndex += dir * visibleItems;
-        if (state.currentIndex < 0) state.currentIndex = 0;
-        else if (state.currentIndex > maxIndex) state.currentIndex = maxIndex;
-
-        slider.style.transform = `translateX(${-(
-          state.currentIndex * itemWidth
-        )}px)`;
-      }
-
-      function openMovie(movieId) {
-        const url = `${movieId}.html`;
-        const newTab = window.open(url, "_blank");
-        if (!newTab || newTab.closed || typeof newTab.closed == "undefined") {
-          window.location.href = url;
-        }
-      }
-
+      // Observe all animated elements
       document.addEventListener("DOMContentLoaded", () => {
-        document.querySelectorAll(".slider-item").forEach((item) => {
-          item.addEventListener("click", () => {
-            const movieId = item.dataset.movie;
-            if (movieId) openMovie(movieId);
+        const elementsToObserve = [
+          ".gallery-section-title",
+          ".gallery-container",
+          ".controls",
+        ];
+
+        elementsToObserve.forEach((selector) => {
+          const element = document.querySelector(selector);
+          if (element) {
+            observer.observe(element);
+          }
+        });
+      });
+
+      // Gallery controls
+      let degrees = 0;
+      const gallery = document.getElementById("gallery");
+      const prevBtn = document.querySelector(".prev");
+      const nextBtn = document.querySelector(".next");
+
+      prevBtn.addEventListener("click", () => {
+        degrees += 45;
+        gallery.style.transform = `perspective(1000px) rotateY(${degrees}deg)`;
+      });
+
+      nextBtn.addEventListener("click", () => {
+        degrees -= 45;
+        gallery.style.transform = `perspective(1000px) rotateY(${degrees}deg)`;
+      });
+
+      // Auto-rotate (only when gallery is visible)
+      let autoRotateInterval;
+
+      const startAutoRotate = () => {
+        autoRotateInterval = setInterval(() => {
+          degrees -= 45;
+          gallery.style.transform = `perspective(1000px) rotateY(${degrees}deg)`;
+        }, 3000);
+      };
+
+      const stopAutoRotate = () => {
+        if (autoRotateInterval) {
+          clearInterval(autoRotateInterval);
+        }
+      };
+
+      // Start auto-rotate when gallery becomes visible
+      const galleryObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              startAutoRotate();
+            } else {
+              stopAutoRotate();
+            }
+          });
+        },
+        { threshold: 0.5 }
+      );
+
+      galleryObserver.observe(gallery);
+
+      // Lightbox functionality
+      const lightbox = document.getElementById("lightbox");
+      const lightboxImg = lightbox.querySelector("img");
+      const closeBtn = lightbox.querySelector(".close-btn");
+
+      // Open lightbox on image click (both featured and gallery images)
+      document
+        .querySelectorAll(".gallery-container img, .featured-photo")
+        .forEach((img) => {
+          img.addEventListener("click", (e) => {
+            e.stopPropagation();
+            lightboxImg.src = img.src;
+            lightbox.classList.add("visible");
+            document.body.style.overflow = "hidden";
           });
         });
 
-        const playBtn = document.querySelector(".btn-play");
-        if (playBtn) {
-          playBtn.addEventListener("click", (e) => {
-            e.preventDefault();
-            openMovie("stranger-things");
-          });
+      // Close lightbox
+      closeBtn.addEventListener("click", () => {
+        lightbox.classList.remove("visible");
+        document.body.style.overflow = "";
+      });
+
+      lightbox.addEventListener("click", (e) => {
+        if (e.target === lightbox) {
+          lightbox.classList.remove("visible");
+          document.body.style.overflow = "";
         }
       });
 
-      window.addEventListener("resize", () => {
-        Object.keys(sliderStates).forEach((id) => {
-          sliderStates[id].currentIndex = 0;
-          document.getElementById(id).style.transform = "translateX(0px)";
+      // Smooth scrolling for any anchor links
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute("href"));
+          if (target) {
+            target.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }
         });
       });
     </script>
